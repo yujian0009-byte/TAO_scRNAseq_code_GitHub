@@ -20,7 +20,8 @@ The script reproduces all analyses reported in the manuscript:
 
 ## Requirements
 
-R ≥ 4.1 with the following packages: Seurat, harmony, tidyverse, plyr, scales,
+R ≥ 4.1 with the following packages: Seurat (≥ 5.0, required for `JoinLayers()`
+and the v5 assay/layer API), harmony, tidyverse, plyr, scales,
 RColorBrewer, patchwork, CellChat, NMF, ggalluvial, pheatmap, ComplexHeatmap,
 cowplot, gridExtra, clusterProfiler, enrichplot, org.Hs.eg.db, monocle (Monocle2),
 Biobase, viridis, data.table.
@@ -40,7 +41,9 @@ All outputs (tables, figures, and `.RData` objects) are written to the
 ## Data availability
 
 Raw and processed scRNA-seq data have been deposited in the NCBI Gene
-Expression Omnibus (GEO) under accession number **GSE346666**.
+Expression Omnibus (GEO) under accession number **GSE346666** (currently under
+controlled access; the records will be released for public access upon journal
+publication, in accordance with GEO policy).
 
 ## Citation
 

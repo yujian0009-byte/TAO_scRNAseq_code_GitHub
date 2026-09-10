@@ -720,8 +720,11 @@ library(viridis)
 # 9.1 Sample cells for pseudotime analysis / 采样用于拟时序分析
 set.seed(42)
 sample_size <- 8000
-cell_indices <- sample(Cells(Fibsub), size = sample_size)
-random_subset <- subset(Fibsub, cells = cell_indices)
+cells_to_sample <- Cells(Fibsub)
+if (length(cells_to_sample) > sample_size) {
+  cells_to_sample <- sample(cells_to_sample, size = sample_size)
+}
+random_subset <- subset(Fibsub, cells = cells_to_sample)
 
 # Set identities to celltype labels (Fib1-Fib5)
 Idents(random_subset) <- random_subset$celltype
@@ -761,7 +764,7 @@ write.csv(diff_celltype, file.path(results_dir, "pseudotime_degForCellOrdering.c
 
 # Select top 1000 ordering genes
 diff_celltype <- diff_celltype[order(diff_celltype$qval), ]
-ordering_genes <- row.names(diff_celltype[1:1000, ])
+ordering_genes <- row.names(diff_celltype)[1:min(1000, nrow(diff_celltype))]
 cds <- setOrderingFilter(cds, ordering_genes = ordering_genes)
 
 pseudotime_dir <- file.path(results_dir, "pseudotime")
@@ -820,7 +823,7 @@ ggsave(file.path(pseudotime_dir, "monocle2_celltype_facet.pdf"),
 
 # 9.7 Pseudotime-dependent genes / 拟时序依赖基因
 diff_test_res <- differentialGeneTest(
-  cds[expressed_genes[1:1000], ],
+  cds[expressed_genes[1:min(1000, length(expressed_genes))], ],
   fullModelFormulaStr = "~sm.ns(Pseudotime)",
   cores = 4
 )
@@ -911,7 +914,7 @@ write.csv(diff_celltype_endo,
 
 # Select top 1000 ordering genes
 diff_celltype_endo <- diff_celltype_endo[order(diff_celltype_endo$qval), ]
-ordering_genes_endo <- row.names(diff_celltype_endo[1:1000, ])
+ordering_genes_endo <- row.names(diff_celltype_endo)[1:min(1000, nrow(diff_celltype_endo))]
 cds_endo <- setOrderingFilter(cds_endo, ordering_genes = ordering_genes_endo)
 
 pseudotime_endo_dir <- file.path(results_dir, "pseudotime_endo")
@@ -972,7 +975,7 @@ ggsave(file.path(pseudotime_endo_dir, "monocle2_endo_celltype_facet.pdf"),
 
 # 9B.7 Pseudotime-dependent genes / 拟时序依赖基因
 diff_test_res_endo <- differentialGeneTest(
-  cds_endo[expressed_genes_endo[1:1000], ],
+  cds_endo[expressed_genes_endo[1:min(1000, length(expressed_genes_endo))], ],
   fullModelFormulaStr = "~sm.ns(Pseudotime)",
   cores = 4
 )
@@ -1021,6 +1024,10 @@ library(gridExtra)
 # Remove epi and neuro cell types for CellChat (as in original analysis)
 ifnb <- subset(scRNA_harmony, celltype != "epi")
 ifnb <- subset(ifnb, celltype != "neuro")
+
+# Use integrated subcluster labels (Fib1-5, Endo1-4, Mac/Mono/DC) from Section 7
+# so that CellChat can reference subcluster-level sender/receiver groups below
+ifnb$celltype <- factor(ifnb$integrated_celltype)
 
 # Split by group / 按分组拆分
 ifnb.list <- SplitObject(ifnb, split.by = "group")
